@@ -24,7 +24,7 @@ To deploy the autoscaling group, follow these steps:
 1. Clone the repository to your local machine:
 
 ```
-git clone https://github.com/your_username/azure-autoscaling-group.git
+git clone https://github.com/AbdulrahmanAlpha/Azure-Autoscaling-Group-with-Terraform
 ```
 
 2. Change directory to the cloned repository:
