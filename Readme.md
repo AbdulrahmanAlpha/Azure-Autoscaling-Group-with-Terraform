@@ -1,84 +1,132 @@
-# Azure Autoscaling Group with Terraform
+# ⚙️ Azure Autoscaling Group with Load Balancer using Terraform
 
-This project demonstrates how to create an autoscaling group for a web application on Azure using Terraform. The autoscaling group automatically adjusts the number of instances based on CPU usage, ensuring that the application can handle varying levels of traffic. The project uses Azure resources such as a virtual network, load balancer, and availability set to create a scalable infrastructure, and includes Terraform configuration files for easy deployment.
+This project sets up an **Azure Virtual Machine Scale Set (VMSS)** with autoscaling, a load balancer, network configurations, and security rules — all provisioned using **Terraform**.
 
-## Prerequisites
+## 📌 Project Features
 
-Before you begin, you will need the following:
+- ✅ Provision Azure Resource Group, Virtual Network, and Subnet  
+- ✅ Create Public IP and Load Balancer with backend pool and NAT rule  
+- ✅ Define Network Security Group with HTTP & SSH access  
+- ✅ Deploy VM Scale Set (VMSS) with Ubuntu Server  
+- ✅ Set up Autoscaling based on CPU utilization  
+- ✅ Use Infrastructure as Code for easy deployment and version control  
 
-- An Azure subscription
-- A service principal with Contributor role access to the subscription. Follow these steps to create a service principal:
-  1. From the Azure portal, navigate to Azure Active Directory.
-  2. Select App registrations and then select New registration.
-  3. Enter a name for the application, select "Accounts in this organizational directory only" as the supported account type, and enter the redirect URI.
-  4. Select Register to create the application.
-  5. Record the Application (client) ID and Directory (tenant) ID.
-  6. Select Certificates & secrets and then select New client secret.
-  7. Enter a description for the secret, select an expiration date, and select Add.
-  8. Record the client secret value.
+---
 
-## Getting Started
-
-To deploy the autoscaling group, follow these steps:
-
-1. Clone the repository to your local machine:
+## 🧱 Architecture
 
 ```
-git clone https://github.com/AbdulrahmanAlpha/Azure-Autoscaling-Group-with-Terraform
-```
 
-2. Change directory to the cloned repository:
-
-```
-cd azure-autoscaling-group
-```
-
-3. Create a `terraform.tfvars` file and set the following variables:
-
-```
-subscription_id = "<your_subscription_id>"
-client_id       = "<your_client_id>"
-client_secret   = "<your_client_secret>"
-tenant_id       = "<your_tenant_id>"
-```
-
-4. Initialize Terraform:
++------------------------+
+\|  Load Balancer (LB)   |
+\|  + NAT Rule + Probe   |
++----------+------------+
+|
++-------v--------+
+\| VM Scale Set   | <--- Ubuntu VMs (autoscaled)
++----------------+
+\|     VNet/Subnet
++----------------+
+\| Resource Group |
++----------------+
 
 ```
+
+---
+
+## 📁 Folder Structure
+
+```
+
+.
+├── main.tf        # Main Terraform configuration
+├── variables.tf   # (Optional) Define input variables
+├── outputs.tf     # (Optional) Define outputs for use in CI/CD
+├── README.md      # You're here
+```
+---
+
+## 🔧 How to Use
+
+### 1. 🔐 Prerequisites
+
+- [Terraform](https://www.terraform.io/downloads.html) installed
+- Azure subscription & Service Principal (for authentication)
+- Permissions to create and manage resources on Azure
+
+### 2. 🧾 Update Credentials
+
+Replace the placeholders in `main.tf` with your Azure credentials:
+
+```hcl
+provider "azurerm" {
+  subscription_id = "<subscription_id>"
+  client_id       = "<client_id>"
+  client_secret   = "<client_secret>"
+  tenant_id       = "<tenant_id>"
+}
+```
+
+### 3. 📦 Initialize & Apply Terraform
+
+```bash
 terraform init
-```
-
-5. Plan the deployment:
-
-```
 terraform plan
-```
-
-6. If the plan looks good, apply the deployment:
-
-```
 terraform apply
 ```
 
-7. Wait for the deployment to complete.
+> ☑️ Confirm the plan and wait for Terraform to complete provisioning.
 
-## Architecture
+---
 
-The autoscaling group is deployed using the following Azure resources:
+## 📊 Autoscaling Behavior
 
-- Resource group: A container for the autoscaling group resources.
-- Virtual network: A logical representation of the network that the autoscaling group instances are connected to.
-- Subnet: A segment of the virtual network that the autoscaling group instances are assigned to.
-- Load balancer: Distributes traffic evenly across the autoscaling group instances.
-- Public IP address: Provides a public IP address for the load balancer.
-- Network security group: Specifies inbound and outbound traffic rules for the autoscaling group instances.
-- Availability set: Ensures that the autoscaling group instances are distributed across multiple fault domains.
-- Virtual machine scale set: Defines the autoscaling group and its instances. The scale set automatically adjusts the number of instances based on CPU usage.
+* 📈 **Scale Out**: When CPU usage > 70% for 5 minutes → Add 1 instance
+* 📉 **Scale In**: When CPU usage < threshold → Remove 20% of instances
+* Minimum 2 and Maximum 5 instances in the VMSS
 
-## Autoscaling Configuration
+---
 
-The autoscaling group scales based on CPU usage. If the CPU usage is greater than 70% for a sustained period of time, the autoscaling group adds one instance. If the CPU usage is less than 80% for a sustained period of time, the autoscaling group removes one instance. The autoscaling group has a minimum of 2 instances and a maximum of 5 instances.
+## 🧪 Testing Your Deployment
 
-## Conclusion
+1. Visit the public IP shown in `terraform output`.
+2. SSH into a VM if needed using port 22.
+3. Monitor load balancer distribution & scale set instance count via Azure Portal.
 
-This project demonstrates how to create an autoscaling group for a web application on Azure using Terraform. The autoscaling group ensures that the application can handle varying levels of traffic by automatically adjusting the number of instances based on CPU usage. The project uses Azure resources such as a virtual network, load balancer, and availability set to create a scalable infrastructure, and includes Terraform configuration files for easy deployment.
+---
+
+## 📌 Notes
+
+* Default OS: **Ubuntu Server 16.04 LTS**
+* Default admin user: `adminuser`
+* Password must be set in `admin_password` field
+* Load balancer listens on port 80 and routes to instances
+
+---
+
+## 🧼 To Destroy
+
+```bash
+terraform destroy
+```
+
+---
+
+## 📚 Resources
+
+* [Terraform Azure Provider Docs](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
+* [Azure Virtual Machine Scale Sets](https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/)
+* [Terraform Best Practices](https://developer.hashicorp.com/terraform/tutorials)
+
+---
+
+## 🙋 About the Author
+
+Made with 💻 by **Abdulrahman A. Muhamad**
+🔗 [GitHub](https://github.com/AbdulrahmanAlpha) | [LinkedIn](https://www.linkedin.com/in/abdulrahmanalpha)
+
+---
+
+> 🚀 Feel free to fork this project and customize it for your infrastructure needs!
+
+```
