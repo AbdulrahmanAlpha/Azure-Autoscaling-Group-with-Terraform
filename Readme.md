@@ -128,5 +128,3 @@ Made with 💻 by **Abdulrahman A. Muhamad**
 ---
 
 > 🚀 Feel free to fork this project and customize it for your infrastructure needs!
-
-```
